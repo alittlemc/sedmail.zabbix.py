@@ -6,22 +6,23 @@ from email.mime.image import MIMEImage
 import smtplib,sys,os,time,re,requests,logging
 from smtplib import SMTP
 
+# 请按照实际情况修改参数
 user='Admin'    #定义zabbix用户名
 password='Zabbix后台密码'    #定义zabbix用户密码
 graph_path='/usr/lib/zabbix/alertscripts/graph'   #定义图片存储路径
-graph_url='http://192.168.32.241:8080/chart.php'     #定义图表的url
-loginurl="http://192.168.32.241:8080/index.php"          #定义登录的url
 host='192.168.32.241'
+graph_url = f'http://{host}:8080/chart.php' #定义图表的url，这里修改你的端口号、http或https
+login_url = f'http://{host}:8080/index.php' #定义登录的url，这里修改你的端口号、http或https
 to_email=sys.argv[1]    #传入的第一个参数为收件人邮箱
 subject=sys.argv[2]  #传入的第二个参数为邮件主题
 subject=subject.encode('utf-8').decode('utf-8')
-smtp_host = 'smtp.xx.com'  #定义smtp主机地址
+smtp_host = 'smtp.xx.com'  #定义smtp服务器地址
 from_email = '你的邮箱@xx.com'     #定义发件人地址
-mail_pass = '你的密码'       #发件人邮箱校验码
+mail_pass = '你的邮箱密码'       #发件人邮箱校验码
 
 def get_itemid():
     #获取报警的itemid
-    itemid=re.search(r'监控ID:(\d+)',sys.argv[3]).group(1)
+    itemid=re.search(r'监控ID:(\d+)',sys.argv[3]).group(1) # 如果修改了Zabbix文字模版，这里对应的也需要修改
     return itemid
 
 def get_graph(itemid):
@@ -41,14 +42,14 @@ def get_graph(itemid):
         "enter":"登录",
         }
         #定义传入的data
-        login=session.post(url=loginurl,headers=loginheaders,data=payload)
+        login=session.post(url=login_url,headers=loginheaders,data=payload)
         # print(login.text)
         #进行登录
         graph_params={
-            "from" :"now-30m",
+            "from" :"now-30m",  # 这里可以修改图片的时间轴，30m即最30分钟
             "to" : "now",
             "itemids[0]" : itemid,
-            "width" : "300",
+            "width" : "300",    #宽度
         }
         # print(itemid)
         # http://zabbix:8080/chart.php?from=now-1m&to=now&itemids%5B0%5D=79672
